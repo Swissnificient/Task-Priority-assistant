@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS tasks (
 
     due_date TEXT,
 
+    due_time TEXT,
+
     created_at TEXT NOT NULL
         DEFAULT CURRENT_TIMESTAMP,
 
