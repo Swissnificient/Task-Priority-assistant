@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Prioritization Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>Task Prioritization Assistant</h1>
+            <p class="subtitle">Organize by urgency, track progress, and conquer your queue.</p>
+        </header>
+
+        <!-- Task Creation Card -->
+        <section class="card form-card">
+            <h2>Add New Task</h2>
+            <form action="{{ url_for('add_task') }}" method="POST" class="task-form">
+                <div class="form-group full-width">
+                    <label for="title">Title <span class="required"></span></label>
+                    <input type="text" id="title" name="title" placeholder="e.g., Draft project architecture specs" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" rows="2" placeholder="Optional details, links, or notes..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="priority">Priority</label>
+                        <select id="priority" name="priority">
+                            <option value="low">Low Priority</option>
+                            <option value="medium" selected>Medium Priority</option>
+                            <option value="high">High Priority</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="due_date">Due Date</label>
+                        <input type="date" id="due_date" name="due_date">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary full-width">Create Task</button>
+            </form>
+        </section>
+
+        <!-- Task Listings -->
+        <section class="task-section">
+            <div class="section-header">
+                <h2>Your Tasks</h2>
+                <span class="task-count">{{ tasks|length }} Total</span>
+            </div>
+
+            <div class="task-list">
+                {% for task in tasks %}
+                <article class="task-card status-{{ task['status'] }}">
+                    <div class="task-main">
+                        <!-- Priority & Status Meta Badges -->
+                        <div class="meta-row">
+                            <span class="badge priority-{{ task['priority'] }}">{{ task['priority'] }}</span>
+                            <span class="badge status-badge status-{{ task['status'] }}">
+                                {{ task['status'].replace('_', ' ') }}
+                            </span>
+                            {% if task['due_date'] %}
+                            <span class="meta-date"> {{ task['due_date'] }}</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Title & Description -->
+                        <h3 class="task-title">{{ task['title'] }}</h3>
+                        {% if task['description'] %}
+                        <p class="task-desc">{{ task['description'] }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Task Status & Deletion Controls -->
+                    <div class="task-controls">
+                        <!-- Status Progression Dropdown/Form -->
+                        <form action="{{ url_for('update_status', id=task['id']) }}" method="POST" class="inline-form">
+                            <select name="status" onchange="this.form.submit()" class="status-select">
+                                <option value="pending" {% if task['status'] == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="in_progress" {% if task['status'] == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                <option value="completed" {% if task['status'] == 'completed' %}selected{% endif %}>Completed</option>
+                            </select>
+                        </form>
+
+                        <!-- Delete Button -->
+                        <form action="{{ url_for('delete_task', id=task['id']) }}" method="POST" class="inline-form">
+                            <button type="submit" class="btn btn-danger" title="Delete Task">✕</button>
+                        </form>
+                    </div>
+                </article>
+                {% else %}
+                <div class="empty-state">
+                    <p>No tasks found. Create one above to get started!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>
